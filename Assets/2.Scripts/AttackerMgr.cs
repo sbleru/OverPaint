@@ -69,7 +69,7 @@ public class AttackerMgr : MonoBehaviour {
 				/* Attacker position を同期させる */
 				photonView.RPC("CreateAttacker", PhotonTargets.All, ui_ctrl.attacker_pos);
 				/* ターンチェンジの共有 */
-				photonView.RPC ("ChangeTurn", PhotonTargets.All, turn_mgr.isRedTurn);
+				photonView.RPC ("ChangeTurn", PhotonTargets.All);
 
 				/* 進行方向の初期化 */
 				ui_ctrl.attacker_direction = 0;
@@ -84,12 +84,16 @@ public class AttackerMgr : MonoBehaviour {
 				photonView.RPC ("SetAttackerDirection", PhotonTargets.All, ui_ctrl.attacker_direction);
 
 				/* 連続でアタッカーを生成できないようにUIを無効にする */
+				/* TODO:ターン交代までにアタッカーがdeleteされているとギリギリもう一回生成できてしまう 
+				 *		ひとまずDeleteまでの時間を長引かせることで解決、でもなんかなー。
+				 */
 				ui_ctrl.enabled = false;
 			}
-		} 
-		else {
+
+		} else {
+			
 			if(temp_attacker != null){
-				Destroy (temp_attacker, 1.0f);
+				Destroy (temp_attacker, 3.0f);
 			}
 		}
 			
@@ -132,13 +136,12 @@ public class AttackerMgr : MonoBehaviour {
 	}
 
 	[PunRPC]
-	IEnumerator ChangeTurn(bool turn){
-		yield return new WaitForSeconds (2.0f);
-		turn ^= true;
-		turn_mgr.isRedTurn = turn;
+	IEnumerator ChangeTurn(){
+		/* ターン交代まで時間を取る */
+		yield return new WaitForSeconds (3.0f);
+
+		turn_mgr.isRedTurn ^= true;
 	}
-
-
 
 	#endregion
 }

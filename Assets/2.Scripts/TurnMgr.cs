@@ -14,23 +14,14 @@ public class TurnMgr : MonoBehaviour {
 	#region private property
 
 	private UICtrl _ui_ctrl;
-	public UICtrl ui_ctrl
+	private UICtrl ui_ctrl
 	{
 		get { 
 			_ui_ctrl = _ui_ctrl ?? (GameObject.FindWithTag("ROOT").GetComponent<UICtrl>());
 			return this._ui_ctrl; 
 		}
 	}
-
-	private AttackerMgr _attacker_mgr;
-	public AttackerMgr attacker_mgr
-	{
-		get { 
-			_attacker_mgr = _attacker_mgr ?? (GameObject.FindWithTag("ROOT").GetComponent<AttackerMgr>());
-			return this._attacker_mgr;
-		}
-	}
-
+		
 	private RoomMgr _room_mgr;
 	private RoomMgr room_mgr
 	{
@@ -41,6 +32,7 @@ public class TurnMgr : MonoBehaviour {
 	}
 
 	PhotonView photonView;
+	private bool isDone = false;
 
 	#endregion
 
@@ -58,16 +50,20 @@ public class TurnMgr : MonoBehaviour {
 		 */
 		if (room_mgr.keyLock) {		
 
+			if (!isDone) {
+				/* ターン情報を共有する　赤ターンから */
+				photonView.RPC ("ShareTurnInfo", PhotonTargets.All);
+				isDone = true;
+			}
+
 			/* はじめにroomに入った人は赤パネル */
 			if (isFirst) {
 
 				/* 青パネルターンの時は操作できないようにする */
-				if (!isRedTurn) {
-					ui_ctrl.enabled = false;
-//					attacker_mgr.enabled = false;
-				} else {
+				if (isRedTurn) {
 					ui_ctrl.enabled = true;
-//					attacker_mgr.enabled = true;
+				} else {
+					ui_ctrl.enabled = false;
 				}
 
 			} else {
@@ -75,17 +71,19 @@ public class TurnMgr : MonoBehaviour {
 				/* 赤パネルターンの時は操作できないようにする */
 				if (isRedTurn) {
 					ui_ctrl.enabled = false;
-//					attacker_mgr.enabled = false;
 				} else {
 					ui_ctrl.enabled = true;
-//					attacker_mgr.enabled = true;
 				}
 			}
 
 		}
 	}
 
-
+	[PunRPC]
+	void ShareTurnInfo(){
+		isRedTurn = true;
+	}
+		
 	[PunRPC]
 	void ChatMessage(string a)
 	{

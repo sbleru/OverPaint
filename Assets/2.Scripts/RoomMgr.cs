@@ -39,10 +39,10 @@ public class RoomMgr: Photon.MonoBehaviour {
 		PhotonPlayer [] player = PhotonNetwork.playerList;
 		if(player.Length < 2){
 			turn_mgr.isFirst = true;
-			turn_mgr.isRedTurn = true;
+//			turn_mgr.isRedTurn = true;
 		} else {
 			turn_mgr.isFirst = false;
-			turn_mgr.isRedTurn = false;
+//			turn_mgr.isRedTurn = false;
 		}
 
 		// プレイヤー名とIDを表示.
